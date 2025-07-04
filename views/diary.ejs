@@ -1,0 +1,216 @@
+
+<style>
+
+    body {
+        font-family: Arial, sans-serif;
+        background: linear-gradient(135deg, #5aa3ec, #e9ecef);
+        margin: 0;
+        padding: 20px;
+    }
+    #addEntryForm {
+            display: none; 
+            /* Ensure the form is hidden initially */
+        }
+        #previouscontent {
+            display: none; /* Ensure the form is hidden initially */
+        }
+
+    button {
+        background-color: #007bff;
+        color: #fff;
+        border: none;
+        padding: 10px 20px;
+        margin: 10px;
+        border-radius: 5px;
+        cursor: pointer;
+        font-size: 16px;
+        align-items: center;
+
+    }
+
+    button:hover {
+        background-color: #0056b3;
+    }
+
+    #addEntryForm, #previouscontent {
+        margin-top: 20px;
+        padding: 20px;
+        border-radius: 8px;
+        background-color: #ffffff;
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    }
+
+    h1, h2 {
+        color: #333;
+    }
+
+    form {
+        display: flex;
+        flex-direction: column;
+    }
+
+    label {
+        margin: 10px 0 5px;
+    }
+
+    input[type="date"], textarea {
+        padding: 10px;
+        border: 1px solid #ccc;
+        border-radius: 5px;
+        font-size: 16px;
+    }
+
+    textarea {
+        resize: vertical;
+        min-height: 100px;
+    }
+
+    button[type="submit"] {
+        margin-top: 20px;
+        background-color: #28a745;
+    }
+
+    button[type="submit"]:hover {
+        background-color: #218838;
+    }
+
+    ul {
+        list-style: none;
+        padding: 0;
+    }
+
+    li {
+        margin-bottom: 10px;
+        padding: 10px;
+        border-bottom: 1px solid #ddd;
+    }
+
+    strong {
+        color: #333;
+    }
+    /* Center the buttons */
+body {
+    font-family: Arial, sans-serif;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    height: 100vh;
+    margin: 0;
+    padding: 0;
+    background-color: #f9f9f9;
+}
+
+button {
+    padding: 10px 20px;
+    margin: 20px;
+    font-size: 16px;
+    cursor: pointer;
+    border: none;
+    border-radius: 5px;
+    background-color: #007bff;
+    color: white;
+    transition: background-color 0.3s;
+}
+
+button:hover {
+    background-color: #0056b3;
+}
+
+/* Center and style the form and previous content */
+#addEntryForm, #previouscontent {
+    display: none;
+    width: 60%;
+    margin-top: 20px;
+    padding: 20px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    background: white;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+h1, h2 {
+    text-align: center;
+}
+
+label {
+    display: block;
+    margin-top: 10px;
+    font-weight: bold;
+}
+
+input, textarea {
+    width: 100%;
+    padding: 10px;
+    margin-top: 5px;
+    margin-bottom: 15px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+}
+
+textarea {
+    height: 100px;
+    resize: none;
+}
+
+ul {
+    list-style-type: none;
+    padding: 0;
+}
+
+li {
+    padding: 10px;
+    margin-bottom: 10px;
+    border-bottom: 1px solid #ddd;
+}
+
+</style>
+
+
+<body>
+    <button id="previousFormBtn">See the previous </button>
+    <div id="previouscontent">
+    <h1>Diary Entries</h1>
+    <ul>
+
+        <% memories.forEach(function(entry) { %>
+            <li><strong>Date:</strong> <%= entry.entry_date %> <br>
+                <strong>Content:</strong> <%= entry.content %></li>
+        <% }); %>
+    </ul>
+    </div>
+   
+    <button id="showFormBtn">Add New</button>
+
+    <div id="addEntryForm">
+        <h2>Add Diary Entry</h2>
+        <form action="/adddiary" method="POST">
+            <label for="entryDate">Date (optional):</label>
+            <input type="date" id="entryDate" name="entryDate">
+            <br>
+            <label for="content">Content:</label>
+            <textarea id="content" name="content" required></textarea>
+            <br>
+            <button type="submit">Add Entry</button>
+        </form>
+    </div>
+    
+    <script>
+
+    document.getElementById('showFormBtn').addEventListener('click', function() {
+        var form = document.getElementById('addEntryForm');
+        form.style.display = 'block';
+    });
+    document.getElementById('previousFormBtn').addEventListener('click', function() {
+        var content = document.getElementById('previouscontent');
+         if(content.style.display === 'none' || content.style.display === ''){
+             content.style.display='block';
+         } 
+         else{
+            content.style.display='none'; 
+         }
+    });
+
+    </script>
+    </body>
+

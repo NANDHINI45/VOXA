@@ -1,0 +1,92 @@
+<style>
+  /* Attractive Styles for Jumbotron */
+
+body {
+    font-family: Arial, sans-serif;
+    background: linear-gradient(to right, #6a11cb, #2575fc);
+    color: white;
+    margin: 0;
+    padding: 0;
+    height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.jumbotron {
+    text-align: center;
+    background: rgba(0, 0, 0, 0.5);
+    padding: 50px 30px;
+    border-radius: 15px;
+    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.3);
+}
+
+.jumbotron .fa-key {
+    color: #ffcc00;
+    margin-bottom: 20px;
+    animation: keyBounce 2s infinite;
+}
+
+@keyframes keyBounce {
+    0%, 100% {
+        transform: translateY(0);
+    }
+    50% {
+        transform: translateY(-10px);
+    }
+}
+
+.jumbotron h1 {
+    font-size: 4rem;
+    font-weight: bold;
+    text-transform: uppercase;
+    margin-bottom: 20px;
+    letter-spacing: 5px;
+}
+
+.jumbotron p {
+    font-size: 1.5rem;
+    margin-bottom: 70px;
+}
+
+.jumbotron a {
+    font-size: 1.2rem;
+    padding: 10px 25px;
+    margin: 50px;
+    border-radius: 5px;
+    text-transform: uppercase;
+    transition: all 0.3s ease;
+    font-weight: bold;
+}
+
+.jumbotron a.btn-light {
+    background: #ffcc00;
+    color: #000;
+}
+
+.jumbotron a.btn-light:hover {
+    background: #000;
+    color: #fff;
+}
+
+.jumbotron a.btn-dark {
+    background: #e6b800;
+    color: #000;
+}
+
+.jumbotron a.btn-dark:hover {
+    background: #000;
+    color: #ffcc00;
+}
+
+</style>
+<div class="jumbotron centered">
+    <div class="container">
+      <i class="fas fa-key fa-6x"></i>
+      <h1 class="display-3">VOXA</h1>
+      <p class="lead">Start your Multitasking here</p>
+      <a class="btn btn-light btn-lg" href="/register" role="button">Register</a>
+      <a class="btn btn-dark btn-lg" href="/login" role="button">Login</a>
+  
+    </div>
+  </div>

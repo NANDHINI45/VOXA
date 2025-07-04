@@ -1,0 +1,138 @@
+
+
+<style>
+  /* Override Styles for Homepage */
+
+/* Body Styles */
+body {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    margin: 0;
+    background: linear-gradient(135deg, #5aa3ec, #e9ecef); /* Gradient Background */
+    font-family: 'Poppins', sans-serif;
+}
+
+/* Container Styles */
+.container {
+    display: flex;
+    justify-content: center;
+    flex-wrap: wrap;
+    max-width: 1200px;
+    width: 100%;
+    padding: 20px;
+    gap: 20px; /* Spacing between boxes */
+}
+
+/* Box Styles */
+.box {
+    flex: 1;
+    min-width: 300px;
+    max-width: 350px;
+    padding: 30px;
+    border-radius: 15px;
+    text-align: center;
+    background: white;
+    box-shadow: 0 8px 15px rgba(0, 0, 0, 0.2);
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.box:hover {
+    transform: translateY(-10px);
+    box-shadow: 0 12px 20px rgba(0, 0, 0, 0.3);
+}
+
+/* Icon Styles */
+.box i {
+    color: #007bff;
+    font-size: 60px;
+    margin-bottom: 15px;
+    transition: color 0.3s ease;
+}
+
+.box:hover i {
+    color: #0056b3;
+}
+
+/* Heading and Paragraph Styles */
+.box h1 {
+    font-size: 28px;
+    color: #333;
+    margin: 15px 0;
+}
+
+.box p {
+    font-size: 16px;
+    color: #555;
+    margin-bottom: 20px;
+}
+
+/* Button Styles */
+.box .btn {
+    background: #007bff;
+    color: white;
+    border: none;
+    padding: 10px 25px;
+    border-radius: 5px;
+    text-decoration: none;
+    font-size: 16px;
+    transition: background 0.3s ease;
+}
+
+.box .btn:hover {
+    background: #0056b3;
+}
+
+/* Horizontal Rule Styles */
+hr {
+    margin: 20px 0;
+    border: 0;
+    border-top: 1px solid #ddd;
+} 
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    .box {
+        min-width: 100%;
+    }
+}
+ 
+    
+</style>
+
+
+  <body>
+    <div class="container">
+
+        <div class="box">
+      <i class="fas fa-key fa-6x"></i>
+      <h1 class="display-3">Diary</h1>
+      <p class="lead">Mark your daily experience here</p>
+      <a class="btn btn-light btn-lg" href="/diary" role="button">Diary</a>
+<hr>
+</div>
+  
+
+     <div class="box">
+      <i class="fas fa-key fa-6x"></i>
+      <h1 class="display-3">Upload images</h1>
+      <p class="lead">Save your memories here</p>
+     
+      <a class="btn btn-light btn-lg" href="/gallery" role="button">upload</a>
+<hr>
+</div>
+    
+  
+
+  
+<div class="box">
+      <i class="fas fa-key fa-6x"></i>
+      <h1 class="display-3">Notes</h1>
+      <p class="lead">Make a todo list to complete your work within due </p>
+       <a class="btn btn-light btn-lg" href="/notes" role="button">TO do list</a>
+<hr>
+</div>
+  
+    </div>
+    </body>

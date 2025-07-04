@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Photo Gallery</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css">
+</head>
+<body>
+<div class="container mt-5">
+    <h1 class="mb-4">Upload Your Memories</h1>
+
+    <!-- Upload Form -->
+    <form action="/upload" method="POST" enctype="multipart/form-data" class="mb-5">
+        <div class="mb-3">
+            <label for="user_id" class="form-label">User ID</label>
+            <input type="text" name="user_id" id="user_id" class="form-control" required>
+        </div>
+        <div class="mb-3">
+            <label for="image" class="form-label">Select Image</label>
+            <input type="file" name="image" id="image" class="form-control" required>
+        </div>
+        <div class="mb-3">
+            <label for="content" class="form-label">Memory Content</label>
+            <textarea name="content" id="content" class="form-control" rows="3"></textarea>
+        </div>
+        <button type="submit" class="btn btn-primary">Upload</button>
+    </form>
+
+    <!-- Display Uploaded Images -->
+    <h2>Your Memories</h2>
+    <div class="row row-cols-1 row-cols-md-3 g-4">
+        <% if (images.length > 0) { %>
+            <% images.forEach(image => { %>
+                <div class="col">
+                    <div class="card h-100">
+                        <img src="/uploads/<%= image.file_name %>" class="card-img-top" alt="Uploaded Image">
+                        <div class="card-body">
+                            <h5 class="card-title">Memory</h5>
+                            <p class="card-text"><%= image.content %></p>
+                            <p class="card-text text-muted">Uploaded on: <%= image.upload_date %></p>
+                            <form action="/images/<%= image.id %>" method="POST" class="d-inline">
+                                <input type="hidden" name="_method" value="DELETE">
+                                <button type="submit" class="btn btn-danger">Delete</button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            <% }) %>
+        <% } else { %>
+            <p>No memories uploaded yet!</p>
+        <% } %>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

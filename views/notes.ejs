@@ -1,0 +1,152 @@
+<style>
+  /* Updated CSS for Vertical List Items */
+
+body {
+    font-family: Arial, sans-serif;
+    background: linear-gradient(135deg, #5aa3ec, #e9ecef);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    margin: 0;
+}
+
+.box {
+    background-color: #ffffff;
+    padding: 20px;
+    border-radius: 8px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    width: 100%;
+    max-width: 600px;
+    margin-bottom: 10px;
+}
+
+h1 {
+    margin: 0;
+    font-size: 24px;
+    color: #333;
+    text-align: center;
+}
+
+.item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    border-bottom: 1px solid #ddd;
+    padding: 10px 0;
+    flex-direction: row;
+}
+
+.item-title {
+    flex: 1;
+    font-size: 18px;
+    margin: 0;
+}
+
+.delete-form {
+    margin-right: 10px;
+}
+
+.edit-form {
+    margin-left: 10px;
+    display: flex;
+    align-items: center;
+}
+
+.edit-btn, .add-btn {
+    background: none;
+    border: none;
+    cursor: pointer;
+}
+
+.icon {
+    width: 20px;
+    height: 20px;
+}
+
+.add-form {
+    display: flex;
+    align-items: center;
+    margin-top: 10px;
+}
+
+input[type="text"] {
+    border: 1px solid #ddd;
+    padding: 8px;
+    border-radius: 4px;
+    margin-right: 10px;
+    flex: 1;
+}
+
+input[type="text"]:focus {
+    border-color: #007bff;
+    outline: none;
+}
+
+.add-btn {
+    background-color: #007bff;
+    color: #fff;
+    border-radius: 4px;
+    padding: 8px 16px;
+    font-size: 18px;
+    cursor: pointer;
+}
+
+.add-btn:hover {
+    background-color: #0056b3;
+}
+
+.edit-btn img {
+    width: 24px;
+    height: 24px;
+}
+
+.edit-btn.hidden {
+    display: none;
+}
+
+</style>
+<div class="box" id="heading">
+  <h1>
+    <%= listTitle %>
+  </h1>
+</div>
+<div class="box">
+  <% for(let item of listItems) { %>
+    <div class="item">
+      <form action="/delete" method="post">
+        <input type="checkbox" onchange="this.form.submit()" name="deleteItemId" value="<%= item.note_id %>">
+      </form>
+
+      <p id="title<%= item.note_id %>">
+        <%= item.title %>
+      </p>
+
+      <form class="edit" action="/edit" method="post">
+        <input type="hidden" name="updatedItemId" value="<%= item.note_id %>">
+        <input id="input<%= item.note_id %>" type="text" name="updatedItemTitle" value="<%= item.title %>" autocomplete="off" autofocus="true" hidden="true" />
+        <button id="done<%= item.note_id %>" class="edit" type="submit" hidden><img class="icon" src="/assets/icons/check-solid.svg" alt="tick image"></button>
+      </form>
+      <button id="edit<%= item.note_id %>" class="edit" onclick="handler('<%= item.note_id %>')"><img class="icon" src="/assets/icons/pencil-solid.svg" alt="pencil image"></button>
+    </div>
+  <% } %>
+
+  <form class="item" action="/add" method="post">
+    <input type="text" name="newItem" placeholder="New Item" autocomplete="off" autofocus="true" />
+    <button class="add" type="submit" name="list" value="<%= listTitle %>">+</button>
+  </form>
+</div>
+
+<script> 
+  function handler(id) {
+    document.getElementById("title" + id).setAttribute("hidden", true);
+    document.getElementById("edit" + id).setAttribute("hidden", true);
+    document.getElementById("done" + id).removeAttribute("hidden");
+    document.getElementById("input" + id).removeAttribute("hidden");
+  }
+</script>
+
+
+
+
+  
