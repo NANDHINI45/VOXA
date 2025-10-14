@@ -49,7 +49,7 @@ app.use(passport.session());
   port: process.env.PG_PORT,
 });
 db.connect();*/
-const pg = require('pg');
+//const pg = require('pg');
 
 const db = new pg.Client({
   user: process.env.PG_USER,
