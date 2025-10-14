@@ -41,14 +41,29 @@ app.use(express.static("public"));
 app.use(passport.initialize());
 app.use(passport.session());
 
-const db = new pg.Client({
+/*const db = new pg.Client({
   user: process.env.PG_USER,
   host: process.env.PG_HOST,
   database: process.env.PG_DATABASE,
   password: process.env.PG_PASSWORD,
   port: process.env.PG_PORT,
 });
-db.connect();
+db.connect();*/
+const pg = require('pg');
+
+const db = new pg.Client({
+  user: process.env.PG_USER,
+  host: process.env.PG_HOST,                  // full host
+  database: process.env.PG_DATABASE,
+  password: process.env.PG_PASSWORD,
+  port: parseInt(process.env.PG_PORT),       // make sure this is a number
+  ssl: { rejectUnauthorized: false }         // required for Render
+});
+
+db.connect()
+  .then(() => console.log("Connected to Postgres!"))
+  .catch(err => console.error("Database connection error:", err));
+
 
 app.get("/logout", (req, res) => {
   req.logout(err => {
