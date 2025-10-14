@@ -358,7 +358,7 @@ passport.use(
     }
   )
 );*/
-passport.use(
+/*passport.use(
   "google",
   new GoogleStrategy(
     {
@@ -373,6 +373,41 @@ passport.use(
         console.log("✅ Google Profile Email:", profile.email);
 
         const result = await db.query("SELECT * FROM logindetails WHERE emailid = $1", [profile.email]);
+
+        if (result.rows.length === 0) {
+          const newUser = await db.query(
+            "INSERT INTO logindetails (emailid, password) VALUES ($1, $2)",
+            [profile.email, "google"]
+          );
+          return cb(null, newUser.rows[0]);
+        } else {
+          return cb(null, result.rows[0]);
+        }
+      } catch (err) {
+        console.error("❌ Error in Google Strategy Callback:", err);
+        return cb(err);
+      }
+    }
+  )
+);*/
+passport.use(
+  "google",
+  new GoogleStrategy(
+    {
+      clientID: process.env.GOOGLE_CLIENT_ID,
+      clientSecret: process.env.GOOGLE_CLIENT_SECRET,
+      callbackURL: `${process.env.BASE_URL}/auth/google/home`,
+      userProfileURL: "https://www.googleapis.com/oauth2/v3/userinfo",
+    },
+    async (accessToken, refreshToken, profile, cb) => {
+      try {
+        console.log("✅ Google Access Token:", accessToken);
+        console.log("✅ Google Profile Email:", profile.email);
+
+        const result = await db.query(
+          "SELECT * FROM logindetails WHERE emailid = $1",
+          [profile.email]
+        );
 
         if (result.rows.length === 0) {
           const newUser = await db.query(
