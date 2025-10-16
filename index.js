@@ -153,16 +153,13 @@ app.get("/testdb", async (req, res) => {
 // --------------------
 // Example root route
 // --------------------
-app.get("/", (req, res) => {
+/*app.get("/", (req, res) => {
   res.send("Server is running!");
-});
+});*/
 
 // --------------------
 // Start server
 // --------------------
-app.listen(port, () => {
-  console.log(`Server listening on port ${port}`);
-});
 
 
 app.get("/logout", (req, res) => {
@@ -414,7 +411,7 @@ app.delete('/images/:id', async (req, res) => {
 
 passport.use(
   "local",
-  new Strategy(async function verify(username, password, cb) {
+  new LocalStrategy(async function verify(username, password, cb) {
     try {
       const result = await db.query("SELECT * FROM logindetails WHERE emailid = $1", [username]);
       if (result.rows.length > 0) {
