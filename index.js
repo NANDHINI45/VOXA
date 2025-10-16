@@ -1,5 +1,5 @@
 
-import express from "express";
+/*import express from "express";
 import bodyParser from "body-parser";
 import pg from "pg";
 import bcrypt from "bcrypt";
@@ -62,7 +62,7 @@ db.connect();*/
 
 db.connect()
   .then(() => console.log("Connected to Postgres!"))
-  .catch(err => console.error("Database connection error:", err));*/
+  .catch(err => console.error("Database connection error:", err));
 //const { Client } = require('pg');
 
 // Use the DATABASE_URL environment variable from Render
@@ -76,8 +76,94 @@ const db = new Client({
 db.connect()
   .then(() => console.log("✅ Connected to Neon Postgres!"))
   .catch(err => console.error("❌ Database connection error:", err));
+*/
 
 //module.exports = db;
+import express from "express";
+import bodyParser from "body-parser";
+import bcrypt from "bcrypt";
+import passport from "passport";
+import { Strategy as LocalStrategy } from "passport-local";
+import GoogleStrategy from "passport-google-oauth2";
+import session from "express-session";
+import dotenv from "dotenv";
+import multer from 'multer';
+import path from 'path';
+import { fileURLToPath } from 'url'; 
+import fs from 'fs';
+import pkg from 'pg';
+
+const { Client } = pkg;  // Correct ES module import for pg
+
+dotenv.config();
+
+const app = express();
+const port = process.env.PORT || 3000;
+
+// File path setup
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+
+// Views & static files
+app.set('view engine', 'ejs');
+app.set('views', path.join(__dirname, 'views'));
+app.use(express.static("public"));
+
+// Body parser
+app.use(bodyParser.urlencoded({ extended: true }));
+
+// Session setup
+app.use(
+  session({
+    secret: process.env.SESSION_SECRET || "default_secret",
+    resave: true,
+    saveUninitialized: false,
+  })
+);
+
+// Passport
+app.use(passport.initialize());
+app.use(passport.session());
+
+// --------------------
+// PostgreSQL Connection
+// --------------------
+const db = new Client({
+  connectionString: process.env.DATABASE_URL,
+  ssl: { rejectUnauthorized: false }  // Required for Neon + Render
+});
+
+db.connect()
+  .then(() => console.log("✅ Connected to Neon Postgres!"))
+  .catch(err => console.error("❌ Database connection error:", err));
+
+// --------------------
+// Test DB route
+// --------------------
+app.get("/testdb", async (req, res) => {
+  try {
+    const result = await db.query("SELECT NOW()");
+    res.send(`✅ Database connected! Server time: ${result.rows[0].now}`);
+  } catch (err) {
+    console.error(err);
+    res.status(500).send("❌ Database connection failed");
+  }
+});
+
+// --------------------
+// Example root route
+// --------------------
+app.get("/", (req, res) => {
+  res.send("Server is running!");
+});
+
+// --------------------
+// Start server
+// --------------------
+app.listen(port, () => {
+  console.log(`Server listening on port ${port}`);
+});
+
 
 app.get("/logout", (req, res) => {
   req.logout(err => {
@@ -453,4 +539,6 @@ app.listen(port, () => {
   console.log(`Listening on port ${port}`);
 });
 
+
+export { db };
 export default app;
