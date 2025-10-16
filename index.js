@@ -51,7 +51,7 @@ app.use(passport.session());
 db.connect();*/
 //const pg = require('pg');
 
-const db = new pg.Client({
+/*const db = new pg.Client({
   user: process.env.PG_USER,
   host: process.env.PG_HOST,                  // full host
   database: process.env.PG_DATABASE,
@@ -62,8 +62,22 @@ const db = new pg.Client({
 
 db.connect()
   .then(() => console.log("Connected to Postgres!"))
-  .catch(err => console.error("Database connection error:", err));
+  .catch(err => console.error("Database connection error:", err));*/
+//const { Client } = require('pg');
 
+// Use the DATABASE_URL environment variable from Render
+const db = new Client({
+  connectionString: process.env.DATABASE_URL,
+  ssl: {
+    rejectUnauthorized: false
+  }
+});
+
+db.connect()
+  .then(() => console.log("✅ Connected to Neon Postgres!"))
+  .catch(err => console.error("❌ Database connection error:", err));
+
+//module.exports = db;
 
 app.get("/logout", (req, res) => {
   req.logout(err => {
