@@ -89,11 +89,14 @@ import session from "express-session";
 import dotenv from "dotenv";
 import multer from 'multer';
 import path from 'path';
-import { fileURLToPath } from 'url'; 
+import { fileURLToPath } from 'url';
 import fs from 'fs';
+import helmet from "helmet";
+import rateLimit from "express-rate-limit";
+import methodOverride from "method-override";
 import pkg from 'pg';
 
-const { Client } = pkg;  // Correct ES module import for pg
+const { Pool } = pkg;  // Changed Client to Pool for better performance
 
 dotenv.config();
 
@@ -108,9 +111,23 @@ const __dirname = path.dirname(__filename);
 app.set('view engine', 'ejs');
 app.set('views', path.join(__dirname, 'views'));
 app.use(express.static("public"));
+app.use('/uploads', express.static('uploads'));
+
+// Security Headers
+app.use(helmet({
+  contentSecurityPolicy: false, // Disabling CSP for now to prevent breaking inline styles/scripts before we fix them completely, or we can configure it loosely.
+}));
+
+// Rate Limiter
+const limiter = rateLimit({
+  windowMs: 15 * 60 * 1000, // 15 minutes
+  max: 100, // Limit each IP to 100 requests per windowMs
+});
+app.use(limiter);
 
 // Body parser
 app.use(bodyParser.urlencoded({ extended: true }));
+app.use(methodOverride('_method'));
 
 // Session setup
 app.use(
@@ -128,13 +145,20 @@ app.use(passport.session());
 // --------------------
 // PostgreSQL Connection
 // --------------------
-const db = new Client({
+// --------------------
+// PostgreSQL Connection Pool
+// --------------------
+const db = new Pool({
   connectionString: process.env.DATABASE_URL,
-  ssl: { rejectUnauthorized: false }  // Required for Neon + Render
+  ssl: { rejectUnauthorized: false },  // Required for Neon + Render
+  max: 20, // Set pool max size to 20
+  idleTimeoutMillis: 30000,
+  connectionTimeoutMillis: 2000,
 });
 
-db.connect()
-  .then(() => console.log("✅ Connected to Neon Postgres!"))
+// Test the pool connection
+db.query('SELECT NOW()')
+  .then(() => console.log("✅ Connected to Neon Postgres via Pool!"))
   .catch(err => console.error("❌ Database connection error:", err));
 
 // --------------------
@@ -255,7 +279,7 @@ app.get("/diary", async (req, res) => {
 });
 
 app.post("/adddiary", async (req, res) => {
-  
+
   const content = req.body.content;
   const entryDate = req.body.entryDate ? new Date(req.body.entryDate) : new Date();
   const user_id = req.user ? req.user.user_id : null;
@@ -342,71 +366,75 @@ app.post("/delete", async (req, res) => {
 
 // Multer setup for file uploads
 const storage = multer.diskStorage({
-    destination: './uploads/',
-    filename: (req, file, cb) => {
-        cb(null, `${Date.now()}_${file.originalname}`);
-    }
+  destination: './uploads/',
+  filename: (req, file, cb) => {
+    cb(null, `${Date.now()}_${file.originalname}`);
+  }
 });
 const upload = multer({ storage });
 
 // Upload image endpoint
 app.post('/upload', upload.single('image'), async (req, res) => {
-    const { user_id, content } = req.body;
-    const file_name = req.file.filename;
+  const { content } = req.body;
+  const user_id = req.user ? req.user.user_id : null;
+  if (!user_id || !req.file) return res.status(400).send("User not logged in or no file uploaded");
+  const file_name = req.file.filename;
 
-    try {
-        await db.query(
-            'INSERT INTO photo_gallery (user_id, file_name, content) VALUES ($1, $2, $3)',
-            [user_id, file_name, content]
-        );
-        res.redirect('/');
-    } catch (error) {
-        console.error(error);
-        res.status(500).send('Error uploading image');
-    }
+  try {
+    await db.query(
+      'INSERT INTO photo_gallery (user_id, file_name, content) VALUES ($1, $2, $3)',
+      [user_id, file_name, content]
+    );
+    res.redirect('/gallery');
+  } catch (error) {
+    console.error(error);
+    res.status(500).send('Error uploading image');
+  }
 });
 
 app.get('/gallery', async (req, res) => {
   const user_id = req.user ? req.user.user_id : null;
 
   if (!user_id) {
-      return res.status(400).send('User ID is required');
+    return res.status(400).send('User ID is required');
   }
 
   try {
-      const result = await db.query(
-          'SELECT * FROM photo_gallery WHERE user_id = $1',
-          [user_id]
-      );
-      res.render('photo_gallery', { images: result.rows });
+    const result = await db.query(
+      'SELECT * FROM photo_gallery WHERE user_id = $1',
+      [user_id]
+    );
+    res.render('photo_gallery', { images: result.rows });
   } catch (error) {
-      console.error(error);
-      res.status(500).send('Error retrieving images');
+    console.error(error);
+    res.status(500).send('Error retrieving images');
   }
 });
 
 
 // Delete image endpoint
 app.delete('/images/:id', async (req, res) => {
-    const { id } = req.params;
-    const { user_id } = req.body;
+  const { id } = req.params;
+  const user_id = req.user ? req.user.user_id : null;
 
-    try {
-        const result = await db.query(
-            'DELETE FROM photo_gallery WHERE id = $1 AND user_id = $2 RETURNING file_name',
-            [id, user_id]
-        );
+  if (!user_id) return res.status(403).send("Unauthorized");
 
-        if (result.rows.length > 0) {
-            fs.unlink(`./uploads/${result.rows[0].file_name}`, (err) => {
-                if (err) console.error(err);
-            });
-        }
-        res.redirect('/');
-    } catch (error) {
-        console.error(error);
-        res.status(500).send('Error deleting image');
+  try {
+    const result = await db.query(
+      'DELETE FROM photo_gallery WHERE id = $1 AND user_id = $2 RETURNING file_name',
+      [id, user_id]
+    );
+
+    if (result.rows.length > 0) {
+      fs.unlink(`./uploads/${result.rows[0].file_name}`, (err) => {
+        if (err) console.error(err);
+      });
     }
+    res.redirect('/gallery');
+  } catch (error) {
+    console.error(error);
+    res.status(500).send('Error deleting image');
+  }
 });
 
 passport.use(
@@ -487,41 +515,45 @@ passport.use(
     }
   )
 );*/
-passport.use(
-  "google",
-  new GoogleStrategy(
-    {
-      clientID: process.env.GOOGLE_CLIENT_ID,
-      clientSecret: process.env.GOOGLE_CLIENT_SECRET,
-      callbackURL: `${process.env.BASE_URL}/auth/google/home`,
-      userProfileURL: "https://www.googleapis.com/oauth2/v3/userinfo",
-    },
-    async (accessToken, refreshToken, profile, cb) => {
-      try {
-        console.log("✅ Google Access Token:", accessToken);
-        console.log("✅ Google Profile Email:", profile.email);
+if (process.env.GOOGLE_CLIENT_ID && process.env.GOOGLE_CLIENT_SECRET) {
+  passport.use(
+    "google",
+    new GoogleStrategy(
+      {
+        clientID: process.env.GOOGLE_CLIENT_ID,
+        clientSecret: process.env.GOOGLE_CLIENT_SECRET,
+        callbackURL: `${process.env.BASE_URL}/auth/google/home`,
+        userProfileURL: "https://www.googleapis.com/oauth2/v3/userinfo",
+      },
+      async (accessToken, refreshToken, profile, cb) => {
+        try {
+          console.log("✅ Google Access Token:", accessToken);
+          console.log("✅ Google Profile Email:", profile.email);
 
-        const result = await db.query(
-          "SELECT * FROM logindetails WHERE emailid = $1",
-          [profile.email]
-        );
-
-        if (result.rows.length === 0) {
-          const newUser = await db.query(
-            "INSERT INTO logindetails (emailid, password) VALUES ($1, $2)",
-            [profile.email, "google"]
+          const result = await db.query(
+            "SELECT * FROM logindetails WHERE emailid = $1",
+            [profile.email]
           );
-          return cb(null, newUser.rows[0]);
-        } else {
-          return cb(null, result.rows[0]);
+
+          if (result.rows.length === 0) {
+            const newUser = await db.query(
+              "INSERT INTO logindetails (emailid, password) VALUES ($1, $2)",
+              [profile.email, "google"]
+            );
+            return cb(null, newUser.rows[0]);
+          } else {
+            return cb(null, result.rows[0]);
+          }
+        } catch (err) {
+          console.error("❌ Error in Google Strategy Callback:", err);
+          return cb(err);
         }
-      } catch (err) {
-        console.error("❌ Error in Google Strategy Callback:", err);
-        return cb(err);
       }
-    }
-  )
-);
+    )
+  );
+} else {
+  console.log("⚠️ Google Client ID/Secret not found. Google Auth will be unavailable.");
+}
 
 
 passport.serializeUser((user, cb) => {
