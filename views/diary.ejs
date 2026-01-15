@@ -1,216 +1,52 @@
+<%- include('partials/header') %>
 
-<style>
+    <div class="container" style="padding-top: 2rem;">
+        <div style="max-width: 800px; margin: 0 auto;">
 
-    body {
-        font-family: Arial, sans-serif;
-        background: linear-gradient(135deg, #5aa3ec, #e9ecef);
-        margin: 0;
-        padding: 20px;
-    }
-    #addEntryForm {
-            display: none; 
-            /* Ensure the form is hidden initially */
-        }
-        #previouscontent {
-            display: none; /* Ensure the form is hidden initially */
-        }
+            <div class="card mb-4" style="margin-bottom: 2rem;">
+                <h2><i class="fas fa-pen-fancy" style="color: var(--primary); margin-right: 0.5rem;"></i> New Entry</h2>
+                <form action="/adddiary" method="POST">
+                    <div class="input-group">
+                        <label for="entryDate">Date</label>
+                        <input type="date" id="entryDate" name="entryDate" class="form-control">
+                    </div>
+                    <div class="input-group">
+                        <label for="content">Dear Diary...</label>
+                        <textarea id="content" name="content" class="form-control"
+                            style="min-height: 150px; resize: vertical;" required
+                            placeholder="Write your thoughts here..."></textarea>
+                    </div>
+                    <button type="submit" class="btn btn-primary"><i class="fas fa-save"></i> Save Memory</button>
+                </form>
+            </div>
 
-    button {
-        background-color: #007bff;
-        color: #fff;
-        border: none;
-        padding: 10px 20px;
-        margin: 10px;
-        border-radius: 5px;
-        cursor: pointer;
-        font-size: 16px;
-        align-items: center;
+            <div class="card">
+                <h2 style="margin-bottom: 1.5rem;"><i class="fas fa-history"
+                        style="color: var(--secondary); margin-right: 0.5rem;"></i> Past Memories</h2>
+                <% if (memories.length===0) { %>
+                    <div style="text-align: center; padding: 2rem; color: var(--text-secondary);">
+                        <i class="fas fa-book-open" style="font-size: 3rem; margin-bottom: 1rem; opacity: 0.5;"></i>
+                        <p>No entries yet. Start writing today!</p>
+                    </div>
+                    <% } else { %>
+                        <div style="display: flex; flex-direction: column; gap: 1rem;">
+                            <% memories.forEach(function(entry) { %>
+                                <div
+                                    style="border-left: 4px solid var(--primary); padding-left: 1.5rem; background: #f8f9fa; padding: 1.5rem; border-radius: 0 var(--radius-sm) var(--radius-sm) 0;">
+                                    <small
+                                        style="color: var(--text-secondary); font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px;">
+                                        <%= new Date(entry.entry_date).toDateString() %>
+                                    </small>
+                                    <p style="margin-top: 0.75rem; white-space: pre-wrap;">
+                                        <%= entry.content %>
+                                    </p>
+                                </div>
+                                <% }); %>
+                        </div>
+                        <% } %>
+            </div>
 
-    }
-
-    button:hover {
-        background-color: #0056b3;
-    }
-
-    #addEntryForm, #previouscontent {
-        margin-top: 20px;
-        padding: 20px;
-        border-radius: 8px;
-        background-color: #ffffff;
-        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-    }
-
-    h1, h2 {
-        color: #333;
-    }
-
-    form {
-        display: flex;
-        flex-direction: column;
-    }
-
-    label {
-        margin: 10px 0 5px;
-    }
-
-    input[type="date"], textarea {
-        padding: 10px;
-        border: 1px solid #ccc;
-        border-radius: 5px;
-        font-size: 16px;
-    }
-
-    textarea {
-        resize: vertical;
-        min-height: 100px;
-    }
-
-    button[type="submit"] {
-        margin-top: 20px;
-        background-color: #28a745;
-    }
-
-    button[type="submit"]:hover {
-        background-color: #218838;
-    }
-
-    ul {
-        list-style: none;
-        padding: 0;
-    }
-
-    li {
-        margin-bottom: 10px;
-        padding: 10px;
-        border-bottom: 1px solid #ddd;
-    }
-
-    strong {
-        color: #333;
-    }
-    /* Center the buttons */
-body {
-    font-family: Arial, sans-serif;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    height: 100vh;
-    margin: 0;
-    padding: 0;
-    background-color: #f9f9f9;
-}
-
-button {
-    padding: 10px 20px;
-    margin: 20px;
-    font-size: 16px;
-    cursor: pointer;
-    border: none;
-    border-radius: 5px;
-    background-color: #007bff;
-    color: white;
-    transition: background-color 0.3s;
-}
-
-button:hover {
-    background-color: #0056b3;
-}
-
-/* Center and style the form and previous content */
-#addEntryForm, #previouscontent {
-    display: none;
-    width: 60%;
-    margin-top: 20px;
-    padding: 20px;
-    border: 1px solid #ccc;
-    border-radius: 5px;
-    background: white;
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-}
-
-h1, h2 {
-    text-align: center;
-}
-
-label {
-    display: block;
-    margin-top: 10px;
-    font-weight: bold;
-}
-
-input, textarea {
-    width: 100%;
-    padding: 10px;
-    margin-top: 5px;
-    margin-bottom: 15px;
-    border: 1px solid #ccc;
-    border-radius: 5px;
-}
-
-textarea {
-    height: 100px;
-    resize: none;
-}
-
-ul {
-    list-style-type: none;
-    padding: 0;
-}
-
-li {
-    padding: 10px;
-    margin-bottom: 10px;
-    border-bottom: 1px solid #ddd;
-}
-
-</style>
-
-
-<body>
-    <button id="previousFormBtn">See the previous </button>
-    <div id="previouscontent">
-    <h1>Diary Entries</h1>
-    <ul>
-
-        <% memories.forEach(function(entry) { %>
-            <li><strong>Date:</strong> <%= entry.entry_date %> <br>
-                <strong>Content:</strong> <%= entry.content %></li>
-        <% }); %>
-    </ul>
+        </div>
     </div>
-   
-    <button id="showFormBtn">Add New</button>
 
-    <div id="addEntryForm">
-        <h2>Add Diary Entry</h2>
-        <form action="/adddiary" method="POST">
-            <label for="entryDate">Date (optional):</label>
-            <input type="date" id="entryDate" name="entryDate">
-            <br>
-            <label for="content">Content:</label>
-            <textarea id="content" name="content" required></textarea>
-            <br>
-            <button type="submit">Add Entry</button>
-        </form>
-    </div>
-    
-    <script>
-
-    document.getElementById('showFormBtn').addEventListener('click', function() {
-        var form = document.getElementById('addEntryForm');
-        form.style.display = 'block';
-    });
-    document.getElementById('previousFormBtn').addEventListener('click', function() {
-        var content = document.getElementById('previouscontent');
-         if(content.style.display === 'none' || content.style.display === ''){
-             content.style.display='block';
-         } 
-         else{
-            content.style.display='none'; 
-         }
-    });
-
-    </script>
-    </body>
-
+    <%- include('partials/footer') %>
